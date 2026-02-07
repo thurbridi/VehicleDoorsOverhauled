@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VehicleDoorsReworked</RootNamespace>
+    <AssemblyName>VehicleDoorsReworked</AssemblyName>
+    <TargetFramework>net35</TargetFramework>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <HintPath>/usr/lib/mono/2.0-api/System.Core.dll</HintPath>
+    </Reference>
+
+    <Reference Include="MSCLoader">
+        <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Winter Car/mywintercar_Data/Managed/MSCLoader.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine">
+        <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Winter Car/mywintercar_Data/Managed/UnityEngine.dll</HintPath>
+    </Reference>
+
+    <Reference Include="Assembly-CSharp">
+        <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Winter Car/mywintercar_Data/Managed/Assembly-CSharp.dll</HintPath>
+    </Reference>
+
+    <Reference Include="PlayMaker">
+        <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Winter Car/mywintercar_Data/Managed/PlayMaker.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
