@@ -1,19 +1,20 @@
+using HutongGames.PlayMaker;
+using MSCLoader;
 using UnityEngine;
 
-namespace VehicleDoorsReworked
+namespace VehicleDoorsOverhauled
 {
-  static class SorbetPatcher
+  static class MachtwagenPatcher
   {
-    private static GameObject sorbet;
     private static GameObject doors;
-    private static Rigidbody sorbetRigidbody;
+    private static Rigidbody vehicleRigidbody;
     private static PlayMakerFSM interiorLightFsm;
     private const float playerInteractionTorque = 50f;
     private const float doorCheckBreakTorque = 75f;
     private const float angularVelocityToCloseDoor = 2.2f;
     private const string audioGroup = "CarFoley";
-    private const string audioClipOpen = "sorbet_door_open";
-    private const string audioClipClose = "sorbet_door_close";
+    private const string audioClipOpen = "taxi_door_open";
+    private const string audioClipClose = "taxi_door_close";
 
     public static void Patch()
     {
@@ -23,17 +24,16 @@ namespace VehicleDoorsReworked
       PatchFRDoor();
       PatchRLDoor();
       PatchRRDoor();
-
-      // PatchTrunkHatch(); // TODO: make interacting with trunk hatch satisfactory
+      PatchTrunkDoor();
     }
 
     static void Initialize()
     {
-      sorbet = GameObject.Find("SORBET(190-200psi)");
+      GameObject vehicle = GameObject.Find("JOBS").transform.Find("TAXIJOB/MACHTWAGEN").gameObject;
 
-      sorbetRigidbody = sorbet.GetComponent<Rigidbody>();
-      doors = sorbet.transform.Find("Doors").gameObject;
-      interiorLightFsm = sorbet.transform.Find("LOD/InteriorLight/Use").GetComponent<PlayMakerFSM>();
+      vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
+      doors = vehicle.transform.Find("Doors").gameObject;
+      interiorLightFsm = vehicle.transform.Find("Functions/Dashboard/Buttons/ButtonDome").GetComponent<PlayMakerFSM>();
     }
 
     static void OnDoorOpened(Transform audioSource)
@@ -53,7 +53,7 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorFront(leftx)");
       Transform doorHandle = door.Find("FrontL/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
       PatchLeftSideDoor(doorHandle.gameObject, door.gameObject);
@@ -64,8 +64,11 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorFront(right)");
       Transform doorHandle = door.Find("FrontR/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
-      useDoorFsm.enabled = false;
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
+      // keep npc interaction
+      useDoorFsm.GetState("Mouse off").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[2].Enabled = false;
 
       PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
     }
@@ -75,7 +78,7 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorRear(leftx)");
       Transform doorHandle = door.Find("RearL/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
       PatchLeftSideDoor(doorHandle.gameObject, door.gameObject);
@@ -86,43 +89,18 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorRear(right)");
       Transform doorHandle = door.Find("RearR/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
-      useDoorFsm.enabled = false;
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
+      // keep npc interaction
+      useDoorFsm.GetState("Mouse off").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[2].Enabled = false;
 
       PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
     }
 
-    static void PatchTrunkHatch()
+    static void PatchTrunkDoor()
     {
-      Transform hatch = sorbet.transform.Find("Hatch/Hatch");
-
-      var useHatchFsm = hatch.GetComponent<PlayMakerFSM>();
-      useHatchFsm.enabled = false;
-
-      var doorComponent = hatch.gameObject.AddComponent<VehicleDoor>();
-      doorComponent.Initialize(new VehicleDoor.Config()
-      {
-        playerOpenTorque = 105f,
-        playerCloseTorque = -playerInteractionTorque,
-        doorCheckBreakTorque = doorCheckBreakTorque,
-        hingeAxis = VehicleDoor.Axis.Y,
-        door = hatch.gameObject,
-        openHingeLimits = new JointLimits() { min = 0f, max = 75f },
-        closedHingeLimits = new JointLimits() { min = 0f, max = 0f },
-        vehicleRigidbody = sorbetRigidbody,
-        onDoorOpened = () =>
-        {
-          MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: hatch, variationName: "sorbet_bootlid_open");
-        },
-        onDoorClosed = () =>
-        {
-          MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: hatch, variationName: "sorbet_bootlid_close");
-        },
-        isDoorNearClosedPredicate = (doorAngle) => doorAngle < 1f,
-        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle > 60f,
-        isDoorFastEnoughToClosePredicate = (doorAngularVelocity) => doorAngularVelocity > angularVelocityToCloseDoor,
-        angularVelocityAxis = VehicleDoor.Axis.X,
-      });
+      // TODO: implement trunk door pathching after extending the monobehavior to support trunk doors
     }
 
     static void PatchLeftSideDoor(GameObject doorHandle, GameObject door)
@@ -137,7 +115,7 @@ namespace VehicleDoorsReworked
         door = door.gameObject,
         openHingeLimits = new JointLimits() { min = 0f, max = 80f },
         closedHingeLimits = new JointLimits() { min = 0f, max = 0f },
-        vehicleRigidbody = sorbetRigidbody,
+        vehicleRigidbody = vehicleRigidbody,
         onDoorOpened = () => OnDoorOpened(door.transform),
         onDoorClosed = () => OnDoorClosed(door.transform),
         isDoorNearClosedPredicate = (doorAngle) => doorAngle <= 275f,
@@ -160,7 +138,7 @@ namespace VehicleDoorsReworked
         door = door.gameObject,
         openHingeLimits = new JointLimits() { min = -80f, max = 0f },
         closedHingeLimits = new JointLimits() { min = 0f, max = 0f },
-        vehicleRigidbody = sorbetRigidbody,
+        vehicleRigidbody = vehicleRigidbody,
         onDoorOpened = () => OnDoorOpened(door.transform),
         onDoorClosed = () => OnDoorClosed(door.transform),
         isDoorNearClosedPredicate = (doorAngle) => doorAngle >= 265f,

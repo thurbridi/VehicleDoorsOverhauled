@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace VehicleDoorsReworked
+namespace VehicleDoorsOverhauled
 {
   static class GifuPatcher
   {

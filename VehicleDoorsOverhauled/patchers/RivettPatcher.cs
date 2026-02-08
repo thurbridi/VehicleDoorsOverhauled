@@ -4,7 +4,7 @@ using HutongGames.PlayMaker;
 using MSCLoader;
 using UnityEngine;
 
-namespace VehicleDoorsReworked
+namespace VehicleDoorsOverhauled
 {
   enum DoorSide { Left, Right }
   static class RivettPatcher

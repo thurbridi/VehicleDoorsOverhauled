@@ -3,7 +3,7 @@ using HutongGames.PlayMaker;
 using MSCLoader;
 using UnityEngine;
 
-namespace VehicleDoorsReworked
+namespace VehicleDoorsOverhauled
 {
   public class VehicleDoor : MonoBehaviour
   {
