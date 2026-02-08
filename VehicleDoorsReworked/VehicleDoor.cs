@@ -43,6 +43,7 @@ namespace VehicleDoorsReworked
     private PlayerIntent playerIntent = PlayerIntent.None;
     private bool isRaycastOverCollider = false;
     private bool wasRaycastOverCollider = false;
+    private bool wasPressedOverCollider = false;
 
 
     public void Initialize(Config config)
@@ -133,21 +134,30 @@ namespace VehicleDoorsReworked
       if (isRaycastOverCollider)
       {
         guiUse.Value = true;
-        wasRaycastOverCollider = true;
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+          wasPressedOverCollider = true;
+
+        if (wasPressedOverCollider && Input.GetMouseButton(0))
         {
           playerIntent = PlayerIntent.Open;
         }
-        else if (Input.GetMouseButton(1))
+        else if (wasPressedOverCollider && Input.GetMouseButton(1))
         {
           playerIntent = PlayerIntent.Close;
         }
+
+        wasRaycastOverCollider = true;
       }
       else if (wasRaycastOverCollider)
       {
         guiUse.Value = false;
         wasRaycastOverCollider = false;
+      }
+
+      if (!Input.GetMouseButton(0) && !Input.GetMouseButton(1))
+      {
+        wasPressedOverCollider = false;
       }
     }
 
