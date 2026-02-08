@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VehicleDoorsReworked</RootNamespace>
-    <AssemblyName>VehicleDoorsReworked</AssemblyName>
+    <RootNamespace>VehicleDoorsOverhauled</RootNamespace>
+    <AssemblyName>VehicleDoorsOverhauled</AssemblyName>
     <TargetFramework>net35</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
