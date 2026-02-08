@@ -1,3 +1,5 @@
+using HutongGames.PlayMaker;
+using MSCLoader;
 using UnityEngine;
 
 namespace VehicleDoorsReworked
@@ -51,7 +53,7 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorFront(leftx)");
       Transform doorHandle = door.Find("FrontL/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
       PatchLeftSideDoor(doorHandle.gameObject, door.gameObject);
@@ -62,8 +64,11 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorFront(right)");
       Transform doorHandle = door.Find("FrontR/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
-      useDoorFsm.enabled = false;
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
+      // keep npc interaction
+      useDoorFsm.GetState("Mouse off").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[2].Enabled = false;
 
       PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
     }
@@ -73,7 +78,7 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorRear(leftx)");
       Transform doorHandle = door.Find("RearL/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
       PatchLeftSideDoor(doorHandle.gameObject, door.gameObject);
@@ -84,8 +89,11 @@ namespace VehicleDoorsReworked
       Transform door = doors.transform.Find("DoorRear(right)");
       Transform doorHandle = door.Find("RearR/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
-      useDoorFsm.enabled = false;
+      var useDoorFsm = doorHandle.GetPlayMaker("Use");
+      // keep npc interaction
+      useDoorFsm.GetState("Mouse off").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[0].Enabled = false;
+      useDoorFsm.GetState("Mouse over 1").Actions[2].Enabled = false;
 
       PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
     }
