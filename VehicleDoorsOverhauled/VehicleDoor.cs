@@ -49,6 +49,7 @@ namespace VehicleDoorsOverhauled
     public void Initialize(Config config)
     {
       this.config = config ?? throw new ArgumentNullException("config");
+      gameObject.layer = LayerMask.NameToLayer("HingedObjects");
 
       Vector3 hingeAxisVec;
       switch (config.hingeAxis)
@@ -128,7 +129,7 @@ namespace VehicleDoorsOverhauled
 
     void Update()
     {
-      isRaycastOverCollider = UnifiedRaycast.GetHitAll(doorMeshCollider);
+      isRaycastOverCollider = UnifiedRaycast.GetHitInteraction(doorMeshCollider);
       playerIntent = PlayerIntent.None;
 
       if (isRaycastOverCollider)

@@ -231,6 +231,7 @@ namespace VehicleDoorsOverhauled
         {
           door.GetPlayMaker("Use").enabled = true;
           door.GetComponent<VehicleDoor>().enabled = false;
+          door.gameObject.layer = LayerMask.NameToLayer("Parts");
 
           // Re-enable collision with vehicle body
           Collider doorCollider = door.GetComponent<Collider>();
