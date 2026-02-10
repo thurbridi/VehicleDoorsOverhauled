@@ -41,9 +41,8 @@ namespace VehicleDoorsOverhauled
     private FixedJoint doorCheck;
     private FsmBool guiUse;
     private PlayerIntent playerIntent = PlayerIntent.None;
-    private bool isRaycastOverCollider = false;
-    private bool wasRaycastOverCollider = false;
-    private bool wasPressedOverCollider = false;
+    private bool isColliderHit = false;
+    private bool wasColliderHit = false;
 
 
     public void Initialize(Config config)
@@ -129,36 +128,32 @@ namespace VehicleDoorsOverhauled
 
     void Update()
     {
-      isRaycastOverCollider = UnifiedRaycast.GetHitInteraction(doorMeshCollider);
-      playerIntent = PlayerIntent.None;
+      isColliderHit = UnifiedRaycast.GetHitInteraction(doorMeshCollider);
 
-      if (isRaycastOverCollider)
+      if (isColliderHit)
       {
         guiUse.Value = true;
 
-        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
-          wasPressedOverCollider = true;
-
-        if (wasPressedOverCollider && Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0))
         {
           playerIntent = PlayerIntent.Open;
         }
-        else if (wasPressedOverCollider && Input.GetMouseButton(1))
+        else if (Input.GetMouseButtonDown(1))
         {
           playerIntent = PlayerIntent.Close;
         }
-
-        wasRaycastOverCollider = true;
+        wasColliderHit = true;
       }
-      else if (wasRaycastOverCollider)
+      else if (wasColliderHit)
       {
         guiUse.Value = false;
-        wasRaycastOverCollider = false;
+        wasColliderHit = false;
       }
 
-      if (!Input.GetMouseButton(0) && !Input.GetMouseButton(1))
+      if ((playerIntent == PlayerIntent.Open && !Input.GetMouseButton(0)) ||
+          (playerIntent == PlayerIntent.Close && !Input.GetMouseButton(1)))
       {
-        wasPressedOverCollider = false;
+        playerIntent = PlayerIntent.None;
       }
     }
 
