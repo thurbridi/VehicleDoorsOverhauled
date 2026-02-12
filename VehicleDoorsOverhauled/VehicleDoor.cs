@@ -48,23 +48,11 @@ namespace VehicleDoorsOverhauled
     public void Initialize(Config config)
     {
       this.config = config ?? throw new ArgumentNullException("config");
+
       gameObject.layer = LayerMask.NameToLayer("HingedObjects");
 
-      Vector3 hingeAxisVec;
-      switch (config.hingeAxis)
-      {
-        case Axis.X:
-          hingeAxisVec = Vector3.right;
-          break;
-        case Axis.Y:
-          hingeAxisVec = Vector3.up;
-          break;
-        case Axis.Z:
-          hingeAxisVec = Vector3.forward;
-          break;
-        default:
-          throw new ArgumentOutOfRangeException(nameof(config.hingeAxis), config.hingeAxis, null);
-      }
+      Vector3 hingeAxisVec = Vector3.zero;
+      hingeAxisVec[(int)config.hingeAxis] = 1f;
 
       openTorqueVec = hingeAxisVec.normalized * config.playerOpenTorque;
       closeTorqueVec = hingeAxisVec.normalized * config.playerCloseTorque;
@@ -84,17 +72,10 @@ namespace VehicleDoorsOverhauled
 
     private float GetVectorComponent(Vector3 vec, Axis axis)
     {
-      switch (axis)
-      {
-        case Axis.X:
-          return vec.x;
-        case Axis.Y:
-          return vec.y;
-        case Axis.Z:
-          return vec.z;
-        default:
-          throw new ArgumentOutOfRangeException(nameof(axis), axis, null);
-      }
+      if (!Enum.IsDefined(typeof(Axis), axis))
+        throw new ArgumentOutOfRangeException(nameof(axis), axis, null);
+
+      return vec[(int)axis];
     }
 
     void OnDoorOpened()
@@ -133,6 +114,7 @@ namespace VehicleDoorsOverhauled
       if (isColliderHit)
       {
         guiUse.Value = true;
+        wasColliderHit = true;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -142,7 +124,6 @@ namespace VehicleDoorsOverhauled
         {
           playerIntent = PlayerIntent.Close;
         }
-        wasColliderHit = true;
       }
       else if (wasColliderHit)
       {
