@@ -7,7 +7,7 @@ namespace VehicleDoorsOverhauled
     static Transform doors;
     static Rigidbody vehicleRigidbody;
     private const float playerInteractionTorque = 50f;
-    private const float doorCheckBreakTorque = 75f;
+    private const float doorCheckBreakTorque = 150f;
     private const float angularVelocityToCloseDoor = 2.2f;
     const string audioGroup = "CarFoley";
     const string audioClipOpen = "open_door1";
@@ -51,7 +51,7 @@ namespace VehicleDoorsOverhauled
         onDoorOpened = () => OnDoorOpened(door.transform),
         onDoorClosed = () => OnDoorClosed(door.transform),
         isDoorNearClosedPredicate = (doorAngle) => doorAngle <= 275f,
-        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle > 350f,
+        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle > 349f,
         isDoorFastEnoughToClosePredicate = (doorAngularVelocity) => doorAngularVelocity <= -angularVelocityToCloseDoor,
         angularVelocityAxis = VehicleDoor.Axis.Y,
         doorAngleAxis = VehicleDoor.Axis.Y,
@@ -79,7 +79,7 @@ namespace VehicleDoorsOverhauled
         onDoorOpened = () => OnDoorOpened(door.transform),
         onDoorClosed = () => OnDoorClosed(door.transform),
         isDoorNearClosedPredicate = (doorAngle) => doorAngle >= 265f,
-        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle < 190f,
+        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle < 191f,
         isDoorFastEnoughToClosePredicate = (doorAngularVelocity) => doorAngularVelocity >= angularVelocityToCloseDoor,
         angularVelocityAxis = VehicleDoor.Axis.Y,
         doorAngleAxis = VehicleDoor.Axis.Y,
