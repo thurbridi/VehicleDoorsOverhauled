@@ -12,7 +12,7 @@ namespace VehicleDoorsOverhauled
         public override Game SupportedGames => Game.MyWinterCar; //Supported Games
 
         private SettingsCheckBox shouldPatchSorbet, shouldPatchMachtwagen, shouldPatchBachglotz, shouldPatchGifu, shouldPatchKekmet,
-        shouldPatchRivett;
+        shouldPatchRivett, shouldPatchHeppa;
 
         public override void ModSetup()
         {
@@ -30,6 +30,7 @@ namespace VehicleDoorsOverhauled
             shouldPatchGifu = Settings.AddCheckBox(settingID: "shouldPatchGifu", name: "Patch Gifu", value: true);
             shouldPatchKekmet = Settings.AddCheckBox(settingID: "shouldPatchKekmet", name: "Patch Kekmet", value: true);
             shouldPatchRivett = Settings.AddCheckBox(settingID: "shouldPatchRivett", name: "Patch Rivett", value: true);
+            shouldPatchHeppa = Settings.AddCheckBox(settingID: "shouldPatchHeppa", name: "Patch Heppa", value: true);
         }
 
         private void Mod_OnLoad()
@@ -47,6 +48,8 @@ namespace VehicleDoorsOverhauled
                 KekmetPatcher.Patch();
             if (shouldPatchRivett.GetValue())
                 RivettPatcher.Patch();
+            if (shouldPatchHeppa.GetValue())
+                HeppaPatcher.Patch();
         }
     }
 }
