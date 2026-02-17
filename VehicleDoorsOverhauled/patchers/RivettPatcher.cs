@@ -12,6 +12,7 @@ namespace VehicleDoorsOverhauled
     static Rigidbody vehicleRigidbody;
     static Collider[] vehicleColliders;
     static Transform spawnersVIN, assemblies;
+    static PlayMakerFSM interiorLightFsm;
     private const float playerInteractionTorque = 250f;
     private const float doorCheckBreakTorque = 200f;
     private const float angularVelocityToCloseDoor = 2.2f;
@@ -34,6 +35,7 @@ namespace VehicleDoorsOverhauled
       vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
       vehicleColliders = vehicle.GetComponentsInChildren<Collider>();
       assemblies = vehicle.Find("Assemblies");
+      interiorLightFsm = vehicle.Find("InteriorLight/Use").GetPlayMaker("Use");
     }
 
 
@@ -129,10 +131,10 @@ namespace VehicleDoorsOverhauled
       }
     }
 
-
     static void OnDoorOpened(Transform door)
     {
-      door.parent.GetPlayMaker("Data").GetVariable<FsmBool>("DoorOpen").Value = true;
+      door.parent.GetPlayMaker("Data").GetVariable<FsmBool>("DoorOpen").Value = true; // Don't know what this is used for, just copied from vanilla fsm
+      interiorLightFsm.SendEvent("DOOROPEN");
 
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipOpen);
     }
@@ -140,6 +142,7 @@ namespace VehicleDoorsOverhauled
     static void OnDoorClosed(Transform door)
     {
       door.parent.GetPlayMaker("Data").GetVariable<FsmBool>("DoorOpen").Value = false;
+      interiorLightFsm.SendEvent("DOORCLOSE");
 
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipClose);
 
