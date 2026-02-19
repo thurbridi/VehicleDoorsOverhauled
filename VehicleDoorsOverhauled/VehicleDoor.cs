@@ -13,8 +13,8 @@ namespace VehicleDoorsOverhauled
       public float playerOpenTorque = 80f;
       public float playerCloseTorque = -80f;
       public float doorCheckBreakTorque = 80f;
-      public float staticFrictionTorque = 3f;
-      public float dynamicFrictionTorque = 1.5f;
+      public float staticFrictionTorque = 5f;
+      public float dynamicFrictionTorque = 3f;
       public float breakSpeedDeg = 5f;
       public float captureSpeedDeg = 1f;
       public GameObject door = null;
@@ -78,9 +78,9 @@ namespace VehicleDoorsOverhauled
       enabled = true;
     }
 
-    private void ApplyMotorFriction()
+    private void ApplyMotorFriction(float doorAngularVelocity)
     {
-      float hingeSpeed = Mathf.Abs(doorHingeJoint.velocity);
+      float hingeSpeed = Mathf.Abs(doorAngularVelocity);
       isMotorSlipping = UpdateSlipState(isMotorSlipping, hingeSpeed, config.breakSpeedDeg, config.captureSpeedDeg);
 
       JointMotor motor = doorHingeJoint.motor;
@@ -170,7 +170,8 @@ namespace VehicleDoorsOverhauled
 
     void FixedUpdate()
     {
-      ApplyMotorFriction();
+      float doorAngularVelocity = GetVectorComponent(doorRigidbody.angularVelocity, config.angularVelocityAxis);
+      ApplyMotorFriction(doorAngularVelocity);
 
       switch (playerIntent)
       {
@@ -202,7 +203,6 @@ namespace VehicleDoorsOverhauled
         return; // Early return because door check angle should not be close to closing the door
       }
 
-      float doorAngularVelocity = GetVectorComponent(doorRigidbody.angularVelocity, config.angularVelocityAxis);
 
       // Close door
       bool isDoorNearClosed = config.isDoorNearClosedPredicate(currentDoorAngle);
