@@ -13,6 +13,10 @@ namespace VehicleDoorsOverhauled
       public float playerOpenTorque = 80f;
       public float playerCloseTorque = -80f;
       public float doorCheckBreakTorque = 80f;
+      public float staticFrictionTorque = 3f;
+      public float dynamicFrictionTorque = 1.5f;
+      public float breakSpeedDeg = 5f;
+      public float captureSpeedDeg = 1f;
       public GameObject door = null;
       public Rigidbody vehicleRigidbody = null;
       public JointLimits openHingeLimits, closedHingeLimits;
@@ -43,6 +47,7 @@ namespace VehicleDoorsOverhauled
     private PlayerIntent playerIntent = PlayerIntent.None;
     private bool isColliderHit = false;
     private bool wasColliderHit = false;
+    private bool isMotorSlipping = false;
 
 
     public void Initialize(Config config)
@@ -64,10 +69,35 @@ namespace VehicleDoorsOverhauled
       doorMeshCollider = gameObject.GetComponent<Collider>()
         ?? throw new ArgumentException("VehicleDoor must be attached to a GameObject with a Collider.");
 
+      doorHingeJoint.useMotor = true;
+      doorHingeJoint.useSpring = false; // Unity recommends not using both motor and spring on the same joint, so we disable spring just in case
+
       guiUse = FsmVariables.GlobalVariables.GetFsmBool("GUIuse");
 
       isInitialized = true;
       enabled = true;
+    }
+
+    private void ApplyMotorFriction()
+    {
+      float hingeSpeed = Mathf.Abs(doorHingeJoint.velocity);
+      isMotorSlipping = UpdateSlipState(isMotorSlipping, hingeSpeed, config.breakSpeedDeg, config.captureSpeedDeg);
+
+      JointMotor motor = doorHingeJoint.motor;
+      motor.targetVelocity = 0f;
+      motor.force = isMotorSlipping ? config.dynamicFrictionTorque : config.staticFrictionTorque;
+      motor.freeSpin = false;
+      doorHingeJoint.motor = motor;
+      doorHingeJoint.useMotor = true;
+    }
+
+    private static bool UpdateSlipState(bool isSlipping, float speedDeg, float breakSpeedDeg, float captureSpeedDeg)
+    {
+      if (!isSlipping && speedDeg > breakSpeedDeg)
+        return true;
+      if (isSlipping && speedDeg < captureSpeedDeg)
+        return false;
+      return isSlipping;
     }
 
     private float GetVectorComponent(Vector3 vec, Axis axis)
@@ -140,6 +170,8 @@ namespace VehicleDoorsOverhauled
 
     void FixedUpdate()
     {
+      ApplyMotorFriction();
+
       switch (playerIntent)
       {
         case PlayerIntent.None:
