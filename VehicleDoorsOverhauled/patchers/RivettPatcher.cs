@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace VehicleDoorsOverhauled
 {
-  enum DoorSide { Left, Right }
   static class RivettPatcher
   {
     static Rigidbody vehicleRigidbody;
@@ -156,14 +155,14 @@ namespace VehicleDoorsOverhauled
     static bool IsLeftDoor(Transform door)
     {
       PlayMakerFSM dataFsm = door.GetPlayMaker("Data");
-      string id = PlayMakerExtensions.GetVariable<FsmString>(dataFsm, "ID").Value;
+      string id = dataFsm.GetVariable<FsmString>("ID").Value;
       return id.StartsWith("VIN407");
     }
 
     static bool IsRightDoor(Transform door)
     {
       PlayMakerFSM dataFsm = door.GetPlayMaker("Data");
-      string id = PlayMakerExtensions.GetVariable<FsmString>(dataFsm, "ID").Value;
+      string id = dataFsm.GetVariable<FsmString>("ID").Value;
       return id.StartsWith("VIN408");
     }
 

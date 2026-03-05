@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace VehicleDoorsOverhauled
 {
+  enum DoorSide { Left, Right }
+
   public class VehicleDoor : MonoBehaviour
   {
     public class Config
