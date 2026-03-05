@@ -12,8 +12,8 @@ namespace VehicleDoorsOverhauled
     static Collider[] vehicleColliders;
     static Transform spawnersVIN, assemblies;
     static PlayMakerFSM interiorLightFsm;
-    private const float playerInteractionTorque = 250f;
-    private const float doorCheckBreakTorque = 200f;
+    private const float playerInteractionTorque = 100f;
+    private const float doorCheckBreakTorque = 105f;
     private const float angularVelocityToCloseDoor = 2.2f;
     const string audioGroup = "CarFoley";
     const string audioClipOpen = "corris_door_open";
