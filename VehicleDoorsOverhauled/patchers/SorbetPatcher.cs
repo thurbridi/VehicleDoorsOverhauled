@@ -18,13 +18,10 @@ namespace VehicleDoorsOverhauled
     public static void Patch()
     {
       Initialize();
-      // TODO: have door fsm partially active for npc compatibility
       PatchFLDoor();
       PatchFRDoor();
       PatchRLDoor();
       PatchRRDoor();
-
-      // PatchTrunkHatch(); // TODO: make interacting with trunk hatch satisfactory
     }
 
     static void Initialize()
@@ -90,39 +87,6 @@ namespace VehicleDoorsOverhauled
       useDoorFsm.enabled = false;
 
       PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
-    }
-
-    static void PatchTrunkHatch()
-    {
-      Transform hatch = sorbet.transform.Find("Hatch/Hatch");
-
-      var useHatchFsm = hatch.GetComponent<PlayMakerFSM>();
-      useHatchFsm.enabled = false;
-
-      var doorComponent = hatch.gameObject.AddComponent<VehicleDoor>();
-      doorComponent.Initialize(new VehicleDoor.Config()
-      {
-        playerOpenTorque = 105f,
-        playerCloseTorque = -playerInteractionTorque,
-        doorCheckBreakTorque = doorCheckBreakTorque,
-        hingeAxis = VehicleDoor.Axis.Y,
-        door = hatch.gameObject,
-        openHingeLimits = new JointLimits() { min = 0f, max = 75f },
-        closedHingeLimits = new JointLimits() { min = 0f, max = 0f },
-        vehicleRigidbody = sorbetRigidbody,
-        onDoorOpened = () =>
-        {
-          MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: hatch, variationName: "sorbet_bootlid_open");
-        },
-        onDoorClosed = () =>
-        {
-          MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: hatch, variationName: "sorbet_bootlid_close");
-        },
-        isDoorNearClosedPredicate = (doorAngle) => doorAngle < 1f,
-        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle > 60f,
-        isDoorFastEnoughToClosePredicate = (doorAngularVelocity) => doorAngularVelocity > angularVelocityToCloseDoor,
-        angularVelocityAxis = VehicleDoor.Axis.X,
-      });
     }
 
     static void PatchLeftSideDoor(GameObject doorHandle, GameObject door)

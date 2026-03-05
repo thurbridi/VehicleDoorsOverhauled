@@ -24,7 +24,6 @@ namespace VehicleDoorsOverhauled
       PatchFRDoor();
       PatchRLDoor();
       PatchRRDoor();
-      PatchTrunkDoor();
     }
 
     static void Initialize()
@@ -96,11 +95,6 @@ namespace VehicleDoorsOverhauled
       useDoorFsm.GetState("Mouse over 1").Actions[2].Enabled = false;
 
       PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
-    }
-
-    static void PatchTrunkDoor()
-    {
-      // TODO: implement trunk door pathching after extending the monobehavior to support trunk doors
     }
 
     static void PatchLeftSideDoor(GameObject doorHandle, GameObject door)
