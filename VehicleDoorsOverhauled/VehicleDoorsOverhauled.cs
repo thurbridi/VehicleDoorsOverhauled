@@ -17,6 +17,7 @@ namespace VehicleDoorsOverhauled
     {
       new GifuPatcher("Gifu", () => GameObject.Find("GIFU(750/450psi)").transform),
       new MachtwagenPatcher("Machtwagen", () => GameObject.Find("JOBS").transform.Find("TAXIJOB/MACHTWAGEN")),
+      new RivettPatcher("Rivett", () => GameObject.Find("CORRIS").transform),
     };
 
     private readonly List<KeyValuePair<string, VehiclePatcher>> modPatchers = new()
