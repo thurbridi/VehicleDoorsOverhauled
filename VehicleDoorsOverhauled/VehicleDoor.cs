@@ -5,13 +5,12 @@ using UnityEngine;
 
 namespace VehicleDoorsOverhauled
 {
-  enum DoorSide { Left, Right }
+  public enum DoorSide { Left, Right }
 
   public class VehicleDoor : MonoBehaviour
   {
     public class Config
     {
-      public Axis hingeAxis;
       public float playerOpenTorque = 80f;
       public float playerCloseTorque = -80f;
       public float doorCheckBreakTorque = 80f;
@@ -21,14 +20,15 @@ namespace VehicleDoorsOverhauled
       public float captureSpeedDeg = 1f;
       public GameObject door = null;
       public Rigidbody vehicleRigidbody = null;
-      public JointLimits openHingeLimits, closedHingeLimits;
+      public JointLimits openHingeLimits, closedHingeLimits = new JointLimits() { min = 0f, max = 0f };
       public Action onDoorOpened = null;
       public Action onDoorClosed = null;
       public Func<float, bool> isDoorNearClosedPredicate = null;
       public Func<float, bool> isPastDoorcheckAnglePredicate = null;
       public Func<float, bool> isDoorFastEnoughToClosePredicate = null;
-      public Axis doorAngleAxis;
-      public Axis angularVelocityAxis;
+      public Axis hingeAxis = Axis.Z;
+      public Axis doorAngleAxis = Axis.Y;
+      public Axis angularVelocityAxis = Axis.Y;
     }
 
     public enum Axis { X, Y, Z }
