@@ -40,7 +40,7 @@ namespace VehicleDoorsOverhauled
     private bool isInitialized = false;
     private float currentDoorAngle;
     private bool isDoorOpen = false;
-    private Vector3 openTorqueVec, closeTorqueVec;
+    private Vector3 hingeAxisVec;
     private Collider doorMeshCollider;
     private Rigidbody doorRigidbody;
     private HingeJoint doorHingeJoint;
@@ -58,11 +58,10 @@ namespace VehicleDoorsOverhauled
 
       gameObject.layer = LayerMask.NameToLayer("HingedObjects");
 
-      Vector3 hingeAxisVec = Vector3.zero;
+      hingeAxisVec = Vector3.zero;
       hingeAxisVec[(int)config.hingeAxis] = 1f;
 
-      openTorqueVec = hingeAxisVec.normalized * config.playerOpenTorque;
-      closeTorqueVec = hingeAxisVec.normalized * config.playerCloseTorque;
+      hingeAxisVec = hingeAxisVec.normalized;
 
       doorRigidbody = this.config.door.GetComponent<Rigidbody>()
         ?? throw new ArgumentException("config.door GameObject must have a Rigidbody component.");
@@ -184,10 +183,10 @@ namespace VehicleDoorsOverhauled
           break;
         case PlayerIntent.Open:
           if (!isDoorOpen) OnDoorOpened();
-          doorRigidbody.AddRelativeTorque(openTorqueVec);
+          doorRigidbody.AddRelativeTorque(hingeAxisVec * config.playerOpenTorque);
           break;
         case PlayerIntent.Close:
-          doorRigidbody.AddRelativeTorque(closeTorqueVec);
+          doorRigidbody.AddRelativeTorque(hingeAxisVec * config.playerCloseTorque);
           if (doorCheck != null) Destroy(doorCheck);
           break;
       }
