@@ -11,8 +11,11 @@ namespace VehicleDoorsOverhauled
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "open_door1";
     private const string audioClipClose = "close_door1";
-
-    protected override float DoorCheckBreakTorque => 150f;
+    protected override float DefaultPlayerInteractionTorque => 25f;
+    protected override float DefaultDoorCheckBreakTorque => 85f;
+    protected override float DefaultAngularVelocityToCloseDoor => 2.8f;
+    protected override float DefaultStaticFrictionTorque => 1.6f;
+    protected override float DefaultDynamicFrictionTorque => 0.8f;
 
     public GifuPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) { }
 

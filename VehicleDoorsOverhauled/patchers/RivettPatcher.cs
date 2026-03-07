@@ -11,12 +11,12 @@ namespace VehicleDoorsOverhauled
     private Rigidbody vehicleRigidbody;
     private Transform spawnersVIN, assemblies;
     private PlayMakerFSM interiorLightFsm;
-
-    protected override float PlayerInteractionTorque => 100f;
-    protected override float DoorCheckBreakTorque => 105f;
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "corris_door_open";
     private const string audioClipClose = "corris_door_close";
+    protected override float DefaultPlayerInteractionTorque => 100f;
+    protected override float DefaultDoorCheckBreakTorque => 105f;
+    protected override float DefaultAngularVelocityToCloseDoor => 2f;
 
     public RivettPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) { }
 
@@ -155,7 +155,7 @@ namespace VehicleDoorsOverhauled
     private VehicleDoor.Config CreateDoorConfig(Transform door, DoorSide doorSide)
     {
       bool isLeftDoor = doorSide == DoorSide.Left;
-      return new VehicleDoor.Config()
+      VehicleDoor.Config config = new VehicleDoor.Config()
       {
         playerOpenTorque = isLeftDoor ? PlayerInteractionTorque : -PlayerInteractionTorque,
         playerCloseTorque = isLeftDoor ? -PlayerInteractionTorque : PlayerInteractionTorque,
@@ -173,6 +173,8 @@ namespace VehicleDoorsOverhauled
         angularVelocityAxis = VehicleDoor.Axis.Y,
         doorAngleAxis = VehicleDoor.Axis.Z,
       };
+      RegisterConfigUpdater(config, doorSide);
+      return config;
     }
 
     private bool InjectDataFsm(PlayMakerFSM dataFsm, Transform door, VehicleDoor.Config config)

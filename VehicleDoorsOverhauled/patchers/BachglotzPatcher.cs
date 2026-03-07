@@ -12,6 +12,7 @@ namespace VehicleDoorsOverhauled
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "bach_door_open";
     private const string audioClipClose = "bach_door_close";
+    protected override float DefaultAngularVelocityToCloseDoor => 1.8f;
 
     public BachglotzPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) { }
 

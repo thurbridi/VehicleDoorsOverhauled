@@ -11,6 +11,7 @@ namespace VehicleDoorsOverhauled
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "car_old_door_open";
     private const string audioClipClose = "car_old_door_close";
+    protected override float DefaultAngularVelocityToCloseDoor => 3f;
 
     public KekmetPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) { }
 
