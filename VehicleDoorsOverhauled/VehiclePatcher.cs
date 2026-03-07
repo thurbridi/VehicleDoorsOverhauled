@@ -13,13 +13,21 @@ namespace VehicleDoorsOverhauled
     protected virtual float DynamicFrictionTorque => 3f;
     private readonly string VehicleName;
     protected readonly Func<Transform> FindVehicle;
-    protected SettingsHeader settingsHeader;
-    protected SettingsCheckBox shouldPatchCheckBox;
+    private SettingsHeader settingsHeader;
+    private SettingsCheckBox shouldPatchCheckBox;
 
     public VehiclePatcher(string vehicleName, Func<Transform> vehicleResolver)
     {
       VehicleName = vehicleName;
-      FindVehicle = vehicleResolver;
+      FindVehicle = () =>
+      {
+        Transform vehicle = vehicleResolver();
+        if (!vehicle)
+        {
+          ModConsole.LogError($"[VehicleDoorsOverhauled] Could not find vehicle {VehicleName} using provided resolver.");
+        }
+        return vehicle;
+      };
     }
 
     public bool IsEnabled => shouldPatchCheckBox.GetValue();
