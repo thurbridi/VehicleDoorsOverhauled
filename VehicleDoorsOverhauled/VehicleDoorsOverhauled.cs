@@ -18,6 +18,10 @@ namespace VehicleDoorsOverhauled
       new GifuPatcher("Gifu", () => GameObject.Find("GIFU(750/450psi)").transform),
       new MachtwagenPatcher("Machtwagen", () => GameObject.Find("JOBS").transform.Find("TAXIJOB/MACHTWAGEN")),
       new RivettPatcher("Rivett", () => GameObject.Find("CORRIS").transform),
+      new BachglotzPatcher("Bachglotz", () => GameObject.Find("BACHGLOTZ(1905kg)").transform),
+      new KekmetPatcher("Kekmet", () => GameObject.Find("KEKMET(350-400psi)").transform),
+      new HeppaPatcher("Heppa", () => GameObject.Find("TRAFFIC").transform.Find("VehiclesDirtRoad/Rally/HEPPA")),
+      new SorbetPatcher("Sorbet", () => GameObject.Find("SORBET(190-200psi)").transform),
     };
 
     private readonly List<KeyValuePair<string, VehiclePatcher>> modPatchers = new()

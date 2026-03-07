@@ -1,67 +1,47 @@
+using System;
+using MSCLoader;
 using UnityEngine;
 
 namespace VehicleDoorsOverhauled
 {
-  static class HeppaPatcher
+  public class HeppaPatcher : VehiclePatcher
   {
-    static Transform door;
-    static Transform doorHandle;
-    static Rigidbody vehicleRigidbody;
-    private const float playerInteractionTorque = 50f;
-    private const float doorCheckBreakTorque = 75f;
-    private const float angularVelocityToCloseDoor = 2.2f;
-    const string audioGroup = "CarFoley";
-    const string audioClipOpen = "open_door1";
-    const string audioClipClose = "close_door1";
+    private Transform door;
+    private Transform doorHandle;
+    private Rigidbody vehicleRigidbody;
+    private const string audioGroup = "CarFoley";
+    private const string audioClipOpen = "open_door1";
+    private const string audioClipClose = "close_door1";
 
-    public static void Patch()
+    public HeppaPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) { }
+
+    public override void Patch()
     {
-      Initialize();
+      Transform vehicle = FindVehicle();
+      vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
+      door = vehicle.Find("DriverDoors/doorr");
+      doorHandle = vehicle.Find("DriverDoors/doorr/Pivot/Handle");
+
       PatchRightDoor();
     }
 
-    static void Initialize()
+    protected override void OnDoorOpened(Transform d)
     {
-      Transform vehicle = GameObject.Find("TRAFFIC").transform.Find("VehiclesDirtRoad/Rally/HEPPA");
-      door = vehicle.Find("DriverDoors/doorr");
-      doorHandle = vehicle.Find("DriverDoors/doorr/Pivot/Handle");
-      vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
+      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: d, variationName: audioClipOpen);
     }
 
-    static void PatchRightDoor()
+    protected override void OnDoorClosed(Transform d)
     {
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: d, variationName: audioClipClose);
+    }
+
+    private void PatchRightDoor()
+    {
+      PlayMakerFSM useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
-      var doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
-      doorComponent.Initialize(new VehicleDoor.Config()
-      {
-        playerOpenTorque = -playerInteractionTorque,
-        playerCloseTorque = playerInteractionTorque,
-        doorCheckBreakTorque = doorCheckBreakTorque,
-        hingeAxis = VehicleDoor.Axis.Z,
-        door = door.gameObject,
-        openHingeLimits = new JointLimits() { min = -80f, max = -0.25f },
-        closedHingeLimits = new JointLimits() { min = 0f, max = 0f },
-        vehicleRigidbody = vehicleRigidbody,
-        onDoorOpened = () => OnDoorOpened(door.transform),
-        onDoorClosed = () => OnDoorClosed(door.transform),
-        isDoorNearClosedPredicate = (doorAngle) => doorAngle >= 265f,
-        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle < 190f,
-        isDoorFastEnoughToClosePredicate = (doorAngularVelocity) => doorAngularVelocity >= angularVelocityToCloseDoor,
-        angularVelocityAxis = VehicleDoor.Axis.Y,
-        doorAngleAxis = VehicleDoor.Axis.Y,
-      });
-    }
-
-    static void OnDoorOpened(Transform audioSource)
-    {
-      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: audioSource, variationName: audioClipOpen);
-    }
-
-    static void OnDoorClosed(Transform audioSource)
-    {
-      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: audioSource, variationName: audioClipClose);
+      VehicleDoor doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
+      doorComponent.Initialize(CreateRightDoorConfig(door.gameObject, vehicleRigidbody));
     }
   }
 }

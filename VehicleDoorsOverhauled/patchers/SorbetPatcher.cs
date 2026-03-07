@@ -1,138 +1,91 @@
+using System;
+using MSCLoader;
 using UnityEngine;
 
 namespace VehicleDoorsOverhauled
 {
-  static class SorbetPatcher
+  public class SorbetPatcher : VehiclePatcher
   {
-    private static GameObject sorbet;
-    private static GameObject doors;
-    private static Rigidbody sorbetRigidbody;
-    private static PlayMakerFSM interiorLightFsm;
-    private const float playerInteractionTorque = 50f;
-    private const float doorCheckBreakTorque = 75f;
-    private const float angularVelocityToCloseDoor = 2.2f;
+    private Transform doors;
+    private Rigidbody vehicleRigidbody;
+    private PlayMakerFSM interiorLightFsm;
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "sorbet_door_open";
     private const string audioClipClose = "sorbet_door_close";
 
-    public static void Patch()
+    public SorbetPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) { }
+
+    public override void Patch()
     {
-      Initialize();
+      Transform vehicle = FindVehicle();
+      vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
+      doors = vehicle.Find("Doors");
+      interiorLightFsm = vehicle.Find("LOD/InteriorLight/Use").GetComponent<PlayMakerFSM>();
+
       PatchFLDoor();
       PatchFRDoor();
       PatchRLDoor();
       PatchRRDoor();
     }
 
-    static void Initialize()
+    protected override void OnDoorOpened(Transform door)
     {
-      sorbet = GameObject.Find("SORBET(190-200psi)");
-
-      sorbetRigidbody = sorbet.GetComponent<Rigidbody>();
-      doors = sorbet.transform.Find("Doors").gameObject;
-      interiorLightFsm = sorbet.transform.Find("LOD/InteriorLight/Use").GetComponent<PlayMakerFSM>();
-    }
-
-    static void OnDoorOpened(Transform audioSource)
-    {
-      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: audioSource, variationName: audioClipOpen);
+      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipOpen);
       interiorLightFsm.SendEvent("DOOROPEN");
     }
 
-    static void OnDoorClosed(Transform audioSource)
+    protected override void OnDoorClosed(Transform door)
     {
-      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: audioSource, variationName: audioClipClose);
+      MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipClose);
       interiorLightFsm.SendEvent("DOORCLOSE");
     }
 
-    static void PatchFLDoor()
+    private void PatchFLDoor()
     {
-      Transform door = doors.transform.Find("DoorFront(leftx)");
+      Transform door = doors.Find("DoorFront(leftx)");
       Transform doorHandle = door.Find("FrontL/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      PlayMakerFSM useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
-      PatchLeftSideDoor(doorHandle.gameObject, door.gameObject);
+      VehicleDoor doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
+      doorComponent.Initialize(CreateLeftDoorConfig(door.gameObject, vehicleRigidbody));
     }
 
-    static void PatchFRDoor()
+    private void PatchFRDoor()
     {
-      Transform door = doors.transform.Find("DoorFront(right)");
+      Transform door = doors.Find("DoorFront(right)");
       Transform doorHandle = door.Find("FrontR/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      PlayMakerFSM useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
-      PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
+      VehicleDoor doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
+      doorComponent.Initialize(CreateRightDoorConfig(door.gameObject, vehicleRigidbody));
     }
 
-    static void PatchRLDoor()
+    private void PatchRLDoor()
     {
-      Transform door = doors.transform.Find("DoorRear(leftx)");
+      Transform door = doors.Find("DoorRear(leftx)");
       Transform doorHandle = door.Find("RearL/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      PlayMakerFSM useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
-      PatchLeftSideDoor(doorHandle.gameObject, door.gameObject);
+      VehicleDoor doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
+      doorComponent.Initialize(CreateLeftDoorConfig(door.gameObject, vehicleRigidbody));
     }
 
-    static void PatchRRDoor()
+    private void PatchRRDoor()
     {
-      Transform door = doors.transform.Find("DoorRear(right)");
+      Transform door = doors.Find("DoorRear(right)");
       Transform doorHandle = door.Find("RearR/PlayerColl/Handle");
 
-      var useDoorFsm = doorHandle.GetComponent<PlayMakerFSM>();
+      PlayMakerFSM useDoorFsm = doorHandle.GetPlayMaker("Use");
       useDoorFsm.enabled = false;
 
-      PatchRightSideDoor(doorHandle.gameObject, door.gameObject);
-    }
-
-    static void PatchLeftSideDoor(GameObject doorHandle, GameObject door)
-    {
-      var doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
-      doorComponent.Initialize(new VehicleDoor.Config()
-      {
-        playerOpenTorque = playerInteractionTorque,
-        playerCloseTorque = -playerInteractionTorque,
-        doorCheckBreakTorque = doorCheckBreakTorque,
-        hingeAxis = VehicleDoor.Axis.Z,
-        door = door.gameObject,
-        openHingeLimits = new JointLimits() { min = 0.25f, max = 80f },
-        closedHingeLimits = new JointLimits() { min = 0f, max = 0f },
-        vehicleRigidbody = sorbetRigidbody,
-        onDoorOpened = () => OnDoorOpened(door.transform),
-        onDoorClosed = () => OnDoorClosed(door.transform),
-        isDoorNearClosedPredicate = (doorAngle) => doorAngle <= 275f,
-        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle > 350f,
-        isDoorFastEnoughToClosePredicate = (doorAngularVelocity) => doorAngularVelocity <= -angularVelocityToCloseDoor,
-        angularVelocityAxis = VehicleDoor.Axis.Y,
-        doorAngleAxis = VehicleDoor.Axis.Y,
-      });
-    }
-
-    static void PatchRightSideDoor(GameObject doorHandle, GameObject door)
-    {
-      var doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
-      doorComponent.Initialize(new VehicleDoor.Config()
-      {
-        playerOpenTorque = -playerInteractionTorque,
-        playerCloseTorque = playerInteractionTorque,
-        doorCheckBreakTorque = doorCheckBreakTorque,
-        hingeAxis = VehicleDoor.Axis.Z,
-        door = door.gameObject,
-        openHingeLimits = new JointLimits() { min = -80f, max = -0.25f },
-        closedHingeLimits = new JointLimits() { min = 0f, max = 0f },
-        vehicleRigidbody = sorbetRigidbody,
-        onDoorOpened = () => OnDoorOpened(door.transform),
-        onDoorClosed = () => OnDoorClosed(door.transform),
-        isDoorNearClosedPredicate = (doorAngle) => doorAngle >= 265f,
-        isPastDoorcheckAnglePredicate = (doorAngle) => doorAngle < 190f,
-        isDoorFastEnoughToClosePredicate = (doorAngularVelocity) => doorAngularVelocity >= angularVelocityToCloseDoor,
-        angularVelocityAxis = VehicleDoor.Axis.Y,
-        doorAngleAxis = VehicleDoor.Axis.Y,
-      });
+      VehicleDoor doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
+      doorComponent.Initialize(CreateRightDoorConfig(door.gameObject, vehicleRigidbody));
     }
   }
 }
