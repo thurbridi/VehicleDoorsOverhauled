@@ -3,17 +3,18 @@ using UnityEngine;
 
 namespace VehicleDoorsOverhauled
 {
-  public class ZSakerPatcher : VehiclePatcher
+  public class SakerPatcher : VehiclePatcher
   {
     private Transform doors;
     private Rigidbody vehicleRigidbody;
-    private Saker.Car.InteriorLight interiorLightBehaviour;
-    private Saker.AmbientVolume ambientVolumeBehaviour;
+    // Declared as object to avoid MSCLoader flagging a hard dependency on Saker.dll.
+    private object interiorLightBehaviour;
+    private object ambientVolumeBehaviour;
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "open_door1";
     private const string audioClipClose = "close_door1";
 
-    public ZSakerPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) {}
+    public SakerPatcher(string vehicleName, Func<Transform> vehicleResolver) : base(vehicleName, vehicleResolver) { }
 
     public override void Patch()
     {
@@ -21,7 +22,7 @@ namespace VehicleDoorsOverhauled
       vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
       doors = vehicle.Find("Doors");
       interiorLightBehaviour = vehicle.Find("LOD/Interior Light/Interact").GetComponent<Saker.Car.InteriorLight>();
-      ambientVolumeBehaviour = vehicle.Find("LOD/Interior Light/Interact").GetComponent<Saker.AmbientVolume>();
+      ambientVolumeBehaviour = vehicle.Find("LOD/AmbientVolume").GetComponent<Saker.AmbientVolume>();
       PatchFLDoor();
       PatchFRDoor();
       PatchRLDoor();
@@ -31,14 +32,14 @@ namespace VehicleDoorsOverhauled
     protected override void OnDoorOpened(Transform door)
     {
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipOpen);
-      interiorLightBehaviour.DoorOpened();
-      ambientVolumeBehaviour.AddOpenedObject();
+      (interiorLightBehaviour as Saker.Car.InteriorLight).DoorOpened();
+      (ambientVolumeBehaviour as Saker.AmbientVolume).AddOpenedObject();
     }
     protected override void OnDoorClosed(Transform door)
     {
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipClose);
-      interiorLightBehaviour.DoorClosed();
-      ambientVolumeBehaviour.RemoveOpenedObject();
+      (interiorLightBehaviour as Saker.Car.InteriorLight).DoorClosed();
+      (ambientVolumeBehaviour as Saker.AmbientVolume).RemoveOpenedObject();
     }
 
     private void PatchDoor(string doorName, bool isLeft)

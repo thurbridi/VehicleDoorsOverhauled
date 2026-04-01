@@ -30,7 +30,7 @@ namespace VehicleDoorsOverhauled
       {
         if (!ModLoader.IsModPresent(entry.Key)) continue;
 
-        entry.Value().CreateSettings();
+        entry.Value.CreateSettings();
       }
     }
 
@@ -42,7 +42,7 @@ namespace VehicleDoorsOverhauled
         {
           try
           {
-            patcher.Patch();                    
+            patcher.Patch();
           }
           catch (Exception ex)
           {
@@ -51,14 +51,14 @@ namespace VehicleDoorsOverhauled
         }
       }
     }
-  
+
     private void Mod_PostLoad()
     {
       foreach (var entry in PatcherRegistry.ModPatchers)
       {
         if (!ModLoader.IsModPresent(entry.Key)) continue;
 
-        VehiclePatcher patcher = entry.Value();
+        VehiclePatcher patcher = entry.Value;
         if (patcher.IsEnabled)
         {
           try

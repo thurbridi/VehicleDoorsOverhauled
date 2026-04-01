@@ -51,7 +51,7 @@
         <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Winter Car/mywintercar_Data/Managed/PlayMaker.dll</HintPath>
     </Reference>
 
-    <Reference Include="ZSaker">
+    <Reference Include="Saker">
         <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Summer Car/Mods/Saker.dll</HintPath>
     </Reference>
   </ItemGroup>

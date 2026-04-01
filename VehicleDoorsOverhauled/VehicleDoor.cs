@@ -41,19 +41,19 @@ namespace VehicleDoorsOverhauled
 
     public Config config = null;
 
-  private bool isInitialized = false;
-  private float currentDoorAngle;
-  private bool isDoorOpen = false;
-  private Vector3 hingeAxisVec;
-  private Collider doorMeshCollider;
-  private Rigidbody doorRigidbody;
-  private HingeJoint doorHingeJoint;
-  private FixedJoint doorCheck;
-  private FsmBool guiUse;
-  private PlayerIntent playerIntent = PlayerIntent.None;
-  private bool isColliderHit = false;
-  private bool wasColliderHit = false;
-  private bool isMotorSlipping = false;
+    private bool isInitialized = false;
+    private float currentDoorAngle;
+    private bool isDoorOpen = false;
+    private Vector3 hingeAxisVec;
+    private Collider doorMeshCollider;
+    private Rigidbody doorRigidbody;
+    private HingeJoint doorHingeJoint;
+    private FixedJoint doorCheck;
+    private FsmBool guiUse;
+    private PlayerIntent playerIntent = PlayerIntent.None;
+    private bool isColliderHit = false;
+    private bool wasColliderHit = false;
+    private bool isMotorSlipping = false;
 
 
 
