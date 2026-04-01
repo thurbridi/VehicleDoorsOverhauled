@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-using UnityEngine;
 using MSCLoader;
+using System;
 
 namespace VehicleDoorsOverhauled
 {
@@ -11,72 +10,66 @@ namespace VehicleDoorsOverhauled
     public override string Author => "casper-3"; // Name of the Author (your name)
     public override string Version => "1.2.0"; // Version
     public override string Description => "Overhauls vehicle door controls to use left and right mouse buttons."; // Short description of your mod
-    public override Game SupportedGames => Game.MyWinterCar; //Supported Games
-
-    private readonly List<VehiclePatcher> vanillaPatchers = new List<VehiclePatcher>()
-    {
-      new GifuPatcher("Gifu", () => GameObject.Find("GIFU(750/450psi)").transform),
-      new MachtwagenPatcher("Machtwagen", () => GameObject.Find("JOBS").transform.Find("TAXIJOB/MACHTWAGEN")),
-      new RivettPatcher("Rivett", () => GameObject.Find("CORRIS").transform),
-      new BachglotzPatcher("Bachglotz", () => GameObject.Find("BACHGLOTZ(1905kg)").transform),
-      new KekmetPatcher("Kekmet", () => GameObject.Find("KEKMET(350-400psi)").transform),
-      new HeppaPatcher("Heppa", () => GameObject.Find("TRAFFIC").transform.Find("VehiclesDirtRoad/Rally/HEPPA")),
-      new SorbetPatcher("Sorbet", () => GameObject.Find("SORBET(190-200psi)").transform),
-    };
-
-    private readonly List<KeyValuePair<string, VehiclePatcher>> modPatchers = new()
-    {
-      new("SecondMachtwagen", new MachtwagenPatcher("Machtwagen (Second Machtwagen)", () => GameObject.Find("SECONDMACHTWAGEN").transform)),
-      new("Second Gifu", new GifuPatcher("Gifu (Second Gifu)", () => GameObject.Find("GIFU(650/350psi)").transform)),
-    };
+    public override Game SupportedGames => Game.MyWinterCar | Game.MySummerCar; //Supported Games
 
     public override void ModSetup()
     {
       SetupFunction(Setup.ModSettings, Mod_Settings);
-      SetupFunction(Setup.ModSettingsLoaded, Mod_SettingsLoaded);
       SetupFunction(Setup.OnLoad, Mod_OnLoad);
       SetupFunction(Setup.PostLoad, Mod_PostLoad);
     }
 
     private void Mod_Settings()
     {
-      foreach (VehiclePatcher patcher in vanillaPatchers)
+      foreach (VehiclePatcher patcher in PatcherRegistry.VanillaPatchers)
       {
         patcher.CreateSettings();
       }
 
-      foreach (var entry in modPatchers)
+      foreach (var entry in PatcherRegistry.ModPatchers)
       {
-        entry.Value.CreateSettings();
-      }
-    }
+        if (!ModLoader.IsModPresent(entry.Key)) continue;
 
-    private void Mod_SettingsLoaded()
-    {
-      foreach (var entry in modPatchers)
-      {
-        if (!ModLoader.IsModPresent(entry.Key))
-        {
-          entry.Value.HideSettings();
-        }
+        entry.Value().CreateSettings();
       }
     }
 
     private void Mod_OnLoad()
     {
-      foreach (VehiclePatcher patcher in vanillaPatchers)
+      foreach (VehiclePatcher patcher in PatcherRegistry.VanillaPatchers)
       {
         if (patcher.IsEnabled)
-          patcher.Patch();
+        {
+          try
+          {
+            patcher.Patch();                    
+          }
+          catch (Exception ex)
+          {
+            ModConsole.LogError($"Failed to patch {patcher.VehicleName}: {ex}");
+          }
+        }
       }
     }
-
+  
     private void Mod_PostLoad()
     {
-      foreach (var entry in modPatchers)
+      foreach (var entry in PatcherRegistry.ModPatchers)
       {
-        if (ModLoader.IsModPresent(entry.Key) && entry.Value.IsEnabled)
-          entry.Value.Patch();
+        if (!ModLoader.IsModPresent(entry.Key)) continue;
+
+        VehiclePatcher patcher = entry.Value();
+        if (patcher.IsEnabled)
+        {
+          try
+          {
+            patcher.Patch();
+          }
+          catch (Exception ex)
+          {
+            ModConsole.LogError($"Failed to patch {patcher.VehicleName}: {ex}");
+          }
+        }
       }
     }
   }

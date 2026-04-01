@@ -50,5 +50,9 @@
     <Reference Include="PlayMaker">
         <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Winter Car/mywintercar_Data/Managed/PlayMaker.dll</HintPath>
     </Reference>
+
+    <Reference Include="ZSaker">
+        <HintPath>/home/casper/.local/share/Steam/steamapps/common/My Summer Car/Mods/Saker.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

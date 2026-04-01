@@ -19,7 +19,7 @@ namespace VehicleDoorsOverhauled
     protected float StaticFrictionTorque => staticFrictionTorqueSlider.GetValue();
     protected float DynamicFrictionTorque => dynamicFrictionTorqueSlider.GetValue();
 
-    private readonly string VehicleName;
+    public readonly string VehicleName;
     protected readonly Func<Transform> FindVehicle;
     private SettingsHeader settingsHeader;
     private SettingsCheckBox shouldPatchCheckBox;

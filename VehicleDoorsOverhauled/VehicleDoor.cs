@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using HutongGames.PlayMaker;
 using MSCLoader;
 using UnityEngine;
@@ -29,6 +30,9 @@ namespace VehicleDoorsOverhauled
       public Axis hingeAxis = Axis.Z;
       public Axis doorAngleAxis = Axis.Y;
       public Axis angularVelocityAxis = Axis.Y;
+#if DEBUG
+      public bool debugLog = false;
+#endif
     }
 
     public enum Axis { X, Y, Z }
@@ -37,19 +41,20 @@ namespace VehicleDoorsOverhauled
 
     public Config config = null;
 
-    private bool isInitialized = false;
-    private float currentDoorAngle;
-    private bool isDoorOpen = false;
-    private Vector3 hingeAxisVec;
-    private Collider doorMeshCollider;
-    private Rigidbody doorRigidbody;
-    private HingeJoint doorHingeJoint;
-    private FixedJoint doorCheck;
-    private FsmBool guiUse;
-    private PlayerIntent playerIntent = PlayerIntent.None;
-    private bool isColliderHit = false;
-    private bool wasColliderHit = false;
-    private bool isMotorSlipping = false;
+  private bool isInitialized = false;
+  private float currentDoorAngle;
+  private bool isDoorOpen = false;
+  private Vector3 hingeAxisVec;
+  private Collider doorMeshCollider;
+  private Rigidbody doorRigidbody;
+  private HingeJoint doorHingeJoint;
+  private FixedJoint doorCheck;
+  private FsmBool guiUse;
+  private PlayerIntent playerIntent = PlayerIntent.None;
+  private bool isColliderHit = false;
+  private bool wasColliderHit = false;
+  private bool isMotorSlipping = false;
+
 
 
     public void Initialize(Config config)
@@ -77,6 +82,9 @@ namespace VehicleDoorsOverhauled
 
       isInitialized = true;
       enabled = true;
+#if DEBUG
+      if (config.debugLog) StartCoroutine(DebugLogCoroutine());
+#endif
     }
 
     private void ApplyMotorFriction(float doorAngularVelocity)
@@ -213,5 +221,24 @@ namespace VehicleDoorsOverhauled
         OnDoorClosed();
       }
     }
+
+#if DEBUG
+    private IEnumerator DebugLogCoroutine()
+    {
+      var interval = new WaitForSeconds(1f);
+      while (true)
+      {
+        Vector3 eulers = config.door.transform.localEulerAngles;
+        Vector3 angVel = doorRigidbody.angularVelocity;
+        ModConsole.Log(
+          $"[VDO][{config.door.name}] " +
+          $"angle(X={eulers.x:F1} Y={eulers.y:F1} Z={eulers.z:F1}) " +
+          $"angVel(X={angVel.x:F2} Y={angVel.y:F2} Z={angVel.z:F2}) " +
+          $"axes(hinge={config.hingeAxis} angle={config.doorAngleAxis} vel={config.angularVelocityAxis})"
+        );
+        yield return interval;
+      }
+    }
+#endif
   }
 }
