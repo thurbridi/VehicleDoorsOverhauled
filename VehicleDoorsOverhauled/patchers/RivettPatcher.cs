@@ -10,7 +10,7 @@ namespace VehicleDoorsOverhauled
   {
     private Rigidbody vehicleRigidbody;
     private Transform spawnersVIN, assemblies;
-    private PlayMakerFSM interiorLightFsm;
+    private InteriorLight interiorLightComponent;
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "corris_door_open";
     private const string audioClipClose = "corris_door_close";
@@ -28,16 +28,16 @@ namespace VehicleDoorsOverhauled
       vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
       // vehicleColliders = vehicle.GetComponentsInChildren<Collider>();
       assemblies = vehicle.Find("Assemblies");
-      interiorLightFsm = vehicle.Find("InteriorLight/Use").GetPlayMaker("Use");
 
       PatchExistingDoors();
       PatchDoorSpawners();
+      PatchInteriorLight(vehicle);
     }
 
     protected override void OnDoorOpened(Transform door)
     {
       door.parent.GetPlayMaker("Data").GetVariable<FsmBool>("DoorOpen").Value = true; // Don't know what this is used for, just copied from vanilla fsm
-      interiorLightFsm.SendEvent("DOOROPEN");
+      interiorLightComponent.OnDoorOpened();
 
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipOpen);
     }
@@ -45,7 +45,7 @@ namespace VehicleDoorsOverhauled
     protected override void OnDoorClosed(Transform door)
     {
       door.parent.GetPlayMaker("Data").GetVariable<FsmBool>("DoorOpen").Value = false;
-      interiorLightFsm.SendEvent("DOORCLOSE");
+      interiorLightComponent.OnDoorClosed();
 
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipClose);
 
@@ -204,6 +204,7 @@ namespace VehicleDoorsOverhauled
           door.GetPlayMaker("Use").enabled = true;
           door.GetComponent<VehicleDoor>().enabled = false;
           door.gameObject.layer = LayerMask.NameToLayer("Parts");
+          interiorLightComponent.OnDoorClosed();
         }
       );
       if (!didSucceed)
@@ -214,6 +215,30 @@ namespace VehicleDoorsOverhauled
       }
 
       return didSucceed;
+    }
+
+    private void PatchInteriorLight(Transform vehicle)
+    {
+      var interiorLight = vehicle.Find("InteriorLight");
+      var interiorLightUse = interiorLight.Find("Use");
+
+      interiorLightUse.GetPlayMaker("Use").enabled = false;
+
+      interiorLightUse.gameObject.layer = LayerMask.NameToLayer("Dashboard");
+
+      interiorLightComponent = interiorLightUse.gameObject.AddComponent<InteriorLight>();
+      interiorLightComponent.Initialize(
+        availablePositions: new[] {
+          InteriorLight.SwitchPosition.DOORS,
+          InteriorLight.SwitchPosition.ON,
+          InteriorLight.SwitchPosition.OFF},
+        lightObject: interiorLight.Find("Electrics").gameObject,
+        onSwitch:
+          () => MasterAudio.PlaySound3DAndForget(
+            sType: audioGroup,
+            sourceTrans: interiorLightUse,
+            variationName: "dash_button",
+            volumePercentage: 0.4f));
     }
   }
 }

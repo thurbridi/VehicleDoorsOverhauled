@@ -9,7 +9,9 @@ namespace VehicleDoorsOverhauled
   {
     private Rigidbody vehicleRigidbody;
     private Transform body;
-    private PlayMakerFSM interiorLightFsm;
+    private InteriorLight interiorLightComponent;
+    private Transform interiorLightPivot;
+    private FsmBool fsmLightON;
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "open_door1";
     private const string audioClipClose = "close_door1";
@@ -28,21 +30,23 @@ namespace VehicleDoorsOverhauled
       Transform vehicle = FindVehicle();
       vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
       body = vehicle.Find("Body");
-      interiorLightFsm = vehicle.Find("Interior/InteriorLight").GetPlayMaker("Use");
 
+      PatchInteriorLight(vehicle);
       PatchExistingDoors();
     }
 
     protected override void OnDoorOpened(Transform door)
     {
-      interiorLightFsm.GetVariable<FsmBool>("DoorOpen").Value = true;
+      interiorLightComponent.OnDoorOpened();
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipOpen);
+      fsmLightON.Value = interiorLightComponent.IsLightOn;
     }
 
     protected override void OnDoorClosed(Transform door)
     {
-      interiorLightFsm.GetVariable<FsmBool>("DoorOpen").Value = false;
+      interiorLightComponent.OnDoorClosed();
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipClose);
+      fsmLightON.Value = interiorLightComponent.IsLightOn;
     }
 
     private void PatchExistingDoors()
@@ -132,6 +136,52 @@ namespace VehicleDoorsOverhauled
       {
         ModConsole.LogError($"[VehicleDoorsOverhauled][SatsumaPatcher]: Failed to inject into 'Bolts OFF' state for door {door}.");
       }
+    }
+
+    private void PatchInteriorLight(Transform vehicle)
+    {
+      var interiorLight = vehicle.Find("Interior/InteriorLight");
+      var useFSM = interiorLight.GetPlayMaker("Use");
+      interiorLightPivot = interiorLight.Find("Pivot");
+      fsmLightON = useFSM.GetVariable<FsmBool>("LightON");
+
+      useFSM.enabled = false;
+
+      interiorLight.gameObject.layer = LayerMask.NameToLayer("Dashboard");
+
+      // Correct switch position on load
+      var pivotAngle = interiorLightPivot.localEulerAngles;
+      pivotAngle.y = 0f;
+      interiorLightPivot.localEulerAngles = pivotAngle;
+
+      interiorLightComponent = interiorLight.gameObject.AddComponent<InteriorLight>();
+      interiorLightComponent.Initialize(
+        availablePositions: new[] {
+          InteriorLight.SwitchPosition.DOORS,
+          InteriorLight.SwitchPosition.ON,
+          InteriorLight.SwitchPosition.OFF},
+        lightObject: interiorLight.Find("Light").gameObject,
+        onSwitch:
+          () =>
+          {
+            MasterAudio.PlaySound3DAndForget(
+              sType: audioGroup,
+              sourceTrans: interiorLight,
+              variationName: "dash_button",
+              volumePercentage: 0.4f);
+
+            var pivotAngle = interiorLightPivot.localEulerAngles;
+            var yAngle = interiorLightComponent.GetSwitchPosition() switch
+            {
+              InteriorLight.SwitchPosition.ON => 12f,
+              InteriorLight.SwitchPosition.DOORS => 0f,
+              InteriorLight.SwitchPosition.OFF => -12f,
+              _ => 0f,
+            };
+            pivotAngle.y = yAngle;
+            interiorLightPivot.localEulerAngles = pivotAngle;
+            fsmLightON.Value = interiorLightComponent.IsLightOn;
+          });
     }
   }
 }

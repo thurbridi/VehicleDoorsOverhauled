@@ -8,7 +8,8 @@ namespace VehicleDoorsOverhauled
   {
     private Transform doors;
     private Rigidbody vehicleRigidbody;
-    private PlayMakerFSM interiorLightFsm;
+    private InteriorLight interiorLightComponent;
+    private Transform domeSwitchMesh;
     private const string audioGroup = "CarFoley";
     private const string audioClipOpen = "taxi_door_open";
     private const string audioClipClose = "taxi_door_close";
@@ -19,25 +20,25 @@ namespace VehicleDoorsOverhauled
     {
       Transform vehicle = FindVehicle();
       vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
-      interiorLightFsm = vehicle.Find("Functions/Dashboard/Buttons/ButtonDome").GetPlayMaker("Use");
       doors = vehicle.Find("Doors");
 
       PatchFLDoor();
       PatchFRDoor();
       PatchRLDoor();
       PatchRRDoor();
+      PatchInteriorLight(vehicle);
     }
 
     protected override void OnDoorOpened(Transform door)
     {
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipOpen);
-      interiorLightFsm.SendEvent("DOOROPEN");
+      interiorLightComponent.OnDoorOpened();
     }
 
     protected override void OnDoorClosed(Transform door)
     {
       MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: door, variationName: audioClipClose);
-      interiorLightFsm.SendEvent("DOORCLOSE");
+      interiorLightComponent.OnDoorClosed();
     }
 
     private void PatchFLDoor()
@@ -92,6 +93,31 @@ namespace VehicleDoorsOverhauled
 
       VehicleDoor doorComponent = doorHandle.gameObject.AddComponent<VehicleDoor>();
       doorComponent.Initialize(CreateRightDoorConfig(door.gameObject, vehicleRigidbody));
+    }
+
+    private void PatchInteriorLight(Transform vehicle)
+    {
+      var buttonDome = vehicle.Find("Functions/Dashboard/Buttons/ButtonDome");
+      var interiorLight = vehicle.Find("LOD/InteriorLight");
+      domeSwitchMesh = vehicle.Find("Functions/Dashboard/Buttons/PivotDome/mesh");
+
+      buttonDome.GetPlayMaker("Use").enabled = false;
+      buttonDome.gameObject.layer = LayerMask.NameToLayer("Dashboard");
+
+      interiorLightComponent = buttonDome.gameObject.AddComponent<InteriorLight>();
+      interiorLightComponent.Initialize(
+        availablePositions: new[] {
+          InteriorLight.SwitchPosition.DOORS,
+          InteriorLight.SwitchPosition.ON},
+        lightObject: interiorLight.Find("Light").gameObject,
+        interactionLabel: "Dome light",
+        onSwitch: () =>
+        {
+          MasterAudio.PlaySound3DAndForget(sType: audioGroup, sourceTrans: buttonDome, variationName: "taxi_dash_switch", volumePercentage: 1f);
+          var angles = domeSwitchMesh.localEulerAngles;
+          angles.x = interiorLightComponent.GetSwitchPosition() == InteriorLight.SwitchPosition.DOORS ? 0f : -25f;
+          domeSwitchMesh.localEulerAngles = angles;
+        });
     }
   }
 }
